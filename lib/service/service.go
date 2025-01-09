@@ -4,6 +4,7 @@ import (
 	"log"
 	"mognito/lib/config"
 	"mognito/lib/cstore"
+	"mognito/lib/model"
 	"mognito/lib/render"
 	"net/http"
 	"path/filepath"
@@ -17,6 +18,8 @@ import (
 type Service struct {
 	// Model        *model.Model
 	Muxer        *chi.Mux
+	Config       *config.Config
+	Model        *model.Model
 	SessionStore *cstore.SessionStore
 	Template     *render.Templates
 }
@@ -56,10 +59,10 @@ func NewService(cfg *config.Config) (*Service, error) {
 
 	store := cstore.NewStore(cfg)
 
-	// model, err := model.NewModel(cfg)
-	// if err != nil {
-	// 	log.Fatalf("Error initializing database connection: %s", err)
-	// }
+	model, err := model.NewModel(cfg)
+	if err != nil {
+		log.Fatalf("Error initializing database connection: %s", err)
+	}
 
 	// Static file handler
 	filesDir := http.Dir(filepath.Join(cfg.AppRoot, "assets"))
@@ -73,9 +76,10 @@ func NewService(cfg *config.Config) (*Service, error) {
 
 	s := &Service{
 		SessionStore: store,
-		// Model:        model,
-		Muxer:    mux,
-		Template: template,
+		Config:       cfg,
+		Model:        model,
+		Muxer:        mux,
+		Template:     template,
 	}
 
 	s.setRoutes()
