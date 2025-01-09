@@ -60,13 +60,12 @@ func init() {
 	}
 
 	// Set up OAuth2 config
-	scopes := append([]string{oidc.ScopeOpenID}, cfg.Cognito.Scope...)
 	oauth2Config = oauth2.Config{
 		ClientID:     cfg.Cognito.ClientID,
 		ClientSecret: cfg.Cognito.ClientSecret,
 		RedirectURL:  cfg.Cognito.RedirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       scopes,
+		Scopes:       cfg.Cognito.Scope,
 	}
 }
 
