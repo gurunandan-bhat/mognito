@@ -1,8 +1,8 @@
 package cstore
 
 import (
+	"mognito/lib/config"
 	"net/http"
-	"webplate/lib/config"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"

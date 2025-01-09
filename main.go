@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
+	"mognito/lib/config"
+	"mognito/lib/service"
 	"net/http"
-	"webplate/lib/config"
-	"webplate/lib/service"
 )
 
 func main() {

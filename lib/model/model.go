@@ -2,8 +2,8 @@ package model
 
 import (
 	"log"
+	"mognito/lib/config"
 	"time"
-	"webplate/lib/config"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"

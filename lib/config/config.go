@@ -1,14 +1,16 @@
 package config
 
 import (
-	"fmt"
+	"errors"
 	"os"
+	"path/filepath"
+	"sync"
 
 	"github.com/spf13/viper"
 )
 
 const (
-	defaultConfigFileName = ".webplate.json"
+	defaultConfigFileName = ".mognito.json"
 )
 
 type Config struct {
@@ -24,6 +26,14 @@ type Config struct {
 		Loc                  string `json:"loc,omitempty"`
 		AllowNativePasswords bool   `json:"allowNativePasswords,omitempty"`
 	} `json:"db,omitempty"`
+	Cognito struct {
+		ClientID      string   `json:"clientID,omitempty"`
+		ClientSecret  string   `json:"clientSecret,omitempty"`
+		LoginEndpoint string   `json:"loginEndpoint,omitempty"`
+		RedirectURL   string   `json:"redirectURL,omitempty"`
+		IssuerURL     string   `json:"issuerURL,omitempty"`
+		Scope         []string `json:"scope,omitempty"`
+	} `json:"cognito,omitempty"`
 	Security struct {
 		CSRFKey string `json:"csrfKey,omitempty"`
 	} `json:"security,omitempty"`
@@ -35,35 +45,37 @@ type Config struct {
 	} `json:"session,omitempty"`
 }
 
-var c = Config{}
+var c *Config
+var once sync.Once
 
 func Configuration(configFileName ...string) (*Config, error) {
 
-	if (c == Config{}) {
+	var errOut error
+	once.Do(func() {
 
 		var cfName string
 		switch len(configFileName) {
 		case 0:
 			dirname, err := os.UserHomeDir()
 			if err != nil {
-				return nil, err
+				errOut = err
 			}
-			cfName = fmt.Sprintf("%s/%s", dirname, defaultConfigFileName)
+			cfName = filepath.Join(dirname, defaultConfigFileName)
 		case 1:
 			cfName = configFileName[0]
 		default:
-			return nil, fmt.Errorf("incorrect arguments for configuration file name")
+			errOut = errors.New("incorrect arguments for configuration file name")
 		}
 
 		viper.SetConfigFile(cfName)
 		if err := viper.ReadInConfig(); err != nil {
-			return nil, err
+			errOut = err
 		}
 
 		if err := viper.Unmarshal(&c); err != nil {
-			return nil, err
+			errOut = err
 		}
-	}
+	})
 
-	return &c, nil
+	return c, errOut
 }

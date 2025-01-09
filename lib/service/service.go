@@ -2,11 +2,11 @@ package service
 
 import (
 	"log"
+	"mognito/lib/config"
+	"mognito/lib/cstore"
+	"mognito/lib/render"
 	"net/http"
 	"path/filepath"
-	"webplate/lib/config"
-	"webplate/lib/cstore"
-	"webplate/lib/render"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
