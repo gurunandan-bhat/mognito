@@ -2,7 +2,6 @@ package awscognito
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"mognito/lib/config"
@@ -13,8 +12,8 @@ import (
 )
 
 type ClaimsPage struct {
-	AccessToken string
-	Claims      jwt.MapClaims
+	IDToken string
+	Claims  jwt.MapClaims
 }
 
 var (
@@ -50,7 +49,7 @@ func init() {
 		ClientSecret: cfg.Cognito.ClientSecret,
 		RedirectURL:  cfg.Cognito.RedirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID},
+		Scopes:       append([]string{oidc.ScopeOpenID}, cfg.Cognito.Scope...),
 	}
 }
 
@@ -59,27 +58,31 @@ func GetClaims(code string) (data *ClaimsPage, err error) {
 	ctx := context.Background()
 
 	// Exchange the authorization code for a token
-	rawToken, err := oauth2Config.Exchange(ctx, code)
+	oauth2Token, err := oauth2Config.Exchange(ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("failed to exchange token: %w", err)
 	}
-	tokenString := rawToken.AccessToken
 
-	// Parse the token (do signature verification for your use case in production)
-	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
-	if err != nil {
-		return nil, fmt.Errorf("error parsing token: %w", err)
+	oidcConfig := &oidc.Config{
+		ClientID: oauth2Config.ClientID,
 	}
-
-	// Check if the token is valid and extract claims
-	claims, ok := token.Claims.(jwt.MapClaims)
+	verifier := provider.Verifier(oidcConfig)
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		return nil, errors.New("invalid claims")
+		return nil, fmt.Errorf("no id_token field in oauth2 token")
 	}
+
+	idToken, err := verifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify ID Token: %w", err)
+	}
+
+	var claims jwt.MapClaims
+	idToken.Claims(&claims)
 
 	// Prepare data for rendering the template
 	return &ClaimsPage{
-		AccessToken: tokenString,
-		Claims:      claims,
+		IDToken: rawIDToken,
+		Claims:  claims,
 	}, nil
 }

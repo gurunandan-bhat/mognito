@@ -7,7 +7,7 @@
                 <div class="row">
                     <div class="col-lg-5">
                         <h1>JWT Claims</h1>
-                        <p><strong>Access Token:</strong> {{ .AccessToken }}</p>
+                        <p><strong>Access Token:</strong> {{ .IDToken }}</p>
                         <ul>
                             {{ range $key, $value := .Claims }}
                                 <li>
