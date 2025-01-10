@@ -40,8 +40,8 @@ func LoginURL(cfg *config.Config) (string, error) {
 		v.Add("redirect_uri", cfg.Cognito.RedirectURL)
 
 		l.RawQuery = v.Encode()
-		// Weird that Cognito does not encode the scope param!!
-		// so adding separately
+		// Weird that Cognito does not encode the
+		// scope param!! So adding separately
 		loginURL = l.String() + "&scope=" + strings.Join(cfg.Cognito.Scope, "+")
 	}
 
