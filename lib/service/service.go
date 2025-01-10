@@ -90,5 +90,5 @@ func NewService(cfg *config.Config) (*Service, error) {
 func (s *Service) setRoutes() {
 
 	s.Muxer.Method(http.MethodGet, "/", ServiceHandler(s.Index))
-	s.Muxer.Method(http.MethodGet, "/cognito", ServiceHandler(s.HandleCallback))
+	s.Muxer.Method(http.MethodGet, "/mognito", ServiceHandler(s.HandleCallback))
 }
