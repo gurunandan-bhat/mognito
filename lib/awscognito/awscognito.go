@@ -50,7 +50,7 @@ func init() {
 		ClientSecret: cfg.Cognito.ClientSecret,
 		RedirectURL:  cfg.Cognito.RedirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       append([]string{oidc.ScopeOpenID}, cfg.Cognito.Scope...),
+		Scopes:       []string{oidc.ScopeOpenID},
 	}
 }
 
