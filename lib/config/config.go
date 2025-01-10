@@ -27,12 +27,11 @@ type Config struct {
 		AllowNativePasswords bool   `json:"allowNativePasswords,omitempty"`
 	} `json:"db,omitempty"`
 	Cognito struct {
-		ClientID      string   `json:"clientID,omitempty"`
-		ClientSecret  string   `json:"clientSecret,omitempty"`
-		LoginEndpoint string   `json:"loginEndpoint,omitempty"`
-		RedirectURL   string   `json:"redirectURL,omitempty"`
-		IssuerURL     string   `json:"issuerURL,omitempty"`
-		Scope         []string `json:"scope,omitempty"`
+		ClientID     string   `json:"clientID,omitempty"`
+		ClientSecret string   `json:"clientSecret,omitempty"`
+		RedirectURL  string   `json:"redirectURL,omitempty"`
+		IssuerURL    string   `json:"issuerURL,omitempty"`
+		Scope        []string `json:"scope,omitempty"`
 	} `json:"cognito,omitempty"`
 	Security struct {
 		CSRFKey string `json:"csrfKey,omitempty"`

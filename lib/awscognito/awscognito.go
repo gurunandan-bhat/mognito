@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"mognito/lib/config"
-	"net/url"
-	"strings"
 
 	"github.com/coreos/go-oidc"
 	"github.com/golang-jwt/jwt"
@@ -28,21 +26,7 @@ var (
 func LoginURL(cfg *config.Config) (string, error) {
 
 	if loginURL == "" {
-
-		l, err := url.Parse(cfg.Cognito.LoginEndpoint)
-		if err != nil {
-			return "", fmt.Errorf("error parsing raw url: %s", err)
-		}
-
-		v := url.Values{}
-		v.Set("client_id", cfg.Cognito.ClientID)
-		v.Add("response_type", "code")
-		v.Add("redirect_uri", cfg.Cognito.RedirectURL)
-
-		l.RawQuery = v.Encode()
-		// Weird that Cognito does not encode the
-		// scope param!! So adding separately
-		loginURL = l.String() + "&scope=" + strings.Join(cfg.Cognito.Scope, "+")
+		loginURL = oauth2Config.AuthCodeURL("state", oauth2.AccessTypeOnline)
 	}
 
 	return loginURL, nil
@@ -66,7 +50,7 @@ func init() {
 		ClientSecret: cfg.Cognito.ClientSecret,
 		RedirectURL:  cfg.Cognito.RedirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       cfg.Cognito.Scope,
+		Scopes:       append([]string{oidc.ScopeOpenID}, cfg.Cognito.Scope...),
 	}
 }
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"mognito/lib/awscognito"
 	"net/http"
 )
@@ -8,6 +9,7 @@ import (
 func (s *Service) HandleCallback(w http.ResponseWriter, r *http.Request) error {
 
 	code := r.URL.Query().Get("code")
+	fmt.Println("Code: ", code)
 	claims, err := awscognito.GetClaims(code)
 	if err != nil {
 		return err
