@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/csrf v1.7.2
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
