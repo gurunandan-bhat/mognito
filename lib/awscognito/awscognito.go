@@ -13,7 +13,7 @@ import (
 
 type ClaimsPage struct {
 	RefreshToken string
-	Claims       jwt.MapClaims
+	Claims       jwt.Claims
 	Parts        []string
 }
 
@@ -79,7 +79,7 @@ func GetClaims(code string) (data *ClaimsPage, err error) {
 	// }
 
 	rawRefreshToken := oauth2Token.RefreshToken
-	var claims jwt.MapClaims
+	var claims jwt.Claims
 	parser := jwt.NewParser()
 	_, parts, err := parser.ParseUnverified(rawRefreshToken, claims)
 	if err != nil {
