@@ -1,7 +1,11 @@
 package config
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -32,6 +36,7 @@ type Config struct {
 		RedirectURL  string   `json:"redirectURL,omitempty"`
 		IssuerURL    string   `json:"issuerURL,omitempty"`
 		Scope        []string `json:"scope,omitempty"`
+		State        string   `json:"-"`
 	} `json:"cognito,omitempty"`
 	Security struct {
 		CSRFKey string `json:"csrfKey,omitempty"`
@@ -46,6 +51,14 @@ type Config struct {
 
 var c *Config
 var once sync.Once
+
+func randString(nByte int) (string, error) {
+	b := make([]byte, nByte)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
 
 func Configuration(configFileName ...string) (*Config, error) {
 
@@ -64,17 +77,34 @@ func Configuration(configFileName ...string) (*Config, error) {
 			cfName = configFileName[0]
 		default:
 			errOut = errors.New("incorrect arguments for configuration file name")
+			return
 		}
 
 		viper.SetConfigFile(cfName)
 		if err := viper.ReadInConfig(); err != nil {
 			errOut = err
+			return
 		}
 
 		if err := viper.Unmarshal(&c); err != nil {
 			errOut = err
+			return
 		}
+
+		state, err := randString(16)
+		if err != nil {
+			errOut = fmt.Errorf("error generating random string: %w", err)
+			return
+		}
+		c.Cognito.State = state
 	})
+
+	state, err := randString(16)
+	if err != nil {
+		errOut = fmt.Errorf("error generating random string: %w", err)
+		return nil, errOut
+	}
+	c.Cognito.State = state
 
 	return c, errOut
 }

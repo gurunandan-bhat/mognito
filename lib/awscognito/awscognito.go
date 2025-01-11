@@ -6,14 +6,14 @@ import (
 	"log"
 	"mognito/lib/config"
 
-	"github.com/coreos/go-oidc"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
 )
 
 type ClaimsPage struct {
-	IDToken string
-	Claims  jwt.MapClaims
+	RefreshToken string
+	Claims       jwt.MapClaims
 }
 
 var (
@@ -25,7 +25,7 @@ var (
 func LoginURL(cfg *config.Config) (string, error) {
 
 	if loginURL == "" {
-		loginURL = oauth2Config.AuthCodeURL("state", oauth2.AccessTypeOnline)
+		loginURL = oauth2Config.AuthCodeURL(cfg.Cognito.State, oauth2.AccessTypeOnline)
 	}
 
 	return loginURL, nil
@@ -67,22 +67,22 @@ func GetClaims(code string) (data *ClaimsPage, err error) {
 		ClientID: oauth2Config.ClientID,
 	}
 	verifier := provider.Verifier(oidcConfig)
-	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	rawRefreshToken, ok := oauth2Token.Extra("refresh_token").(string)
 	if !ok {
-		return nil, fmt.Errorf("no id_token field in oauth2 token")
+		return nil, fmt.Errorf("no refresh_token field in oauth2 token")
 	}
 
-	idToken, err := verifier.Verify(ctx, rawIDToken)
+	refreshToken, err := verifier.Verify(ctx, rawRefreshToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify ID Token: %w", err)
 	}
 
 	var claims jwt.MapClaims
-	idToken.Claims(&claims)
+	refreshToken.Claims(&claims)
 
 	// Prepare data for rendering the template
 	return &ClaimsPage{
-		IDToken: rawIDToken,
-		Claims:  claims,
+		RefreshToken: rawRefreshToken,
+		Claims:       claims,
 	}, nil
 }

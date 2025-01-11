@@ -16,7 +16,6 @@ import (
 )
 
 type Service struct {
-	// Model        *model.Model
 	Muxer        *chi.Mux
 	Config       *config.Config
 	Model        *model.Model
