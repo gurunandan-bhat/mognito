@@ -7,7 +7,10 @@
                 <div class="row">
                     <div class="col-lg-5">
                         <h1>JWT Claims</h1>
-                        <p><strong>Access Token:</strong> {{ .IDToken }}</p>
+                        <p><strong>ID Token:</strong></p>
+                        <div style="word-wrap: break-word;">
+                            <pre>{{ .IDToken }}</pre>
+                        </div>
                         <ul>
                             {{ range $key, $value := .Claims }}
                                 <li>

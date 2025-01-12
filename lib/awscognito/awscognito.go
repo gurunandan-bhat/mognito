@@ -7,14 +7,14 @@ import (
 	"mognito/lib/config"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 )
 
 type ClaimsPage struct {
-	RefreshToken string
-	Claims       jwt.Claims
-	Parts        []string
+	IDToken string
+	Claims  jwt.MapClaims
+	Parts   []string
 }
 
 var (
@@ -64,32 +64,28 @@ func GetClaims(code string) (data *ClaimsPage, err error) {
 		return nil, fmt.Errorf("failed to exchange token: %w", err)
 	}
 
-	// oidcConfig := &oidc.Config{
-	// 	ClientID: oauth2Config.ClientID,
-	// }
-	// verifier := provider.Verifier(oidcConfig)
-	// refreshToken, ok := oauth2Token.Extra("refresh_token").(string)
-	// if !ok {
-	// 	return nil, fmt.Errorf("no refresh_token field in oauth2 token")
-	// }
+	oidcConfig := &oidc.Config{
+		ClientID: oauth2Config.ClientID,
+	}
+	verifier := provider.Verifier(oidcConfig)
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		return nil, fmt.Errorf("no id_token field in oauth2 token")
+	}
 
-	// refreshToken, err := verifier.Verify(ctx, rawRefreshToken)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to verify ID Token: %w", err)
-	// }
-
-	rawRefreshToken := oauth2Token.RefreshToken
-	var claims jwt.Claims
-	parser := jwt.NewParser()
-	_, parts, err := parser.ParseUnverified(rawRefreshToken, claims)
+	idToken, err := verifier.Verify(ctx, rawIDToken)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing (unverified) refresh Token: %w", err)
+		return nil, fmt.Errorf("failed to verify ID Token: %w", err)
+	}
+
+	var claims jwt.MapClaims
+	if err := idToken.Claims(&claims); err != nil {
+		return nil, fmt.Errorf("error fetching Claims from ID Token: %w", err)
 	}
 
 	// Prepare data for rendering the template
 	return &ClaimsPage{
-		RefreshToken: rawRefreshToken,
-		Claims:       claims,
-		Parts:        parts,
+		IDToken: rawIDToken,
+		Claims:  claims,
 	}, nil
 }
