@@ -64,16 +64,13 @@ func GetClaims(code string) (data *ClaimsPage, err error) {
 		return nil, fmt.Errorf("failed to exchange token: %w", err)
 	}
 
-	oidcConfig := &oidc.Config{
-		ClientID: oauth2Config.ClientID,
-	}
-	verifier := provider.Verifier(oidcConfig)
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
 		return nil, fmt.Errorf("no id_token field in oauth2 token")
 	}
 
-	idToken, err := verifier.Verify(ctx, rawIDToken)
+	oidcConfig := &oidc.Config{ClientID: oauth2Config.ClientID}
+	idToken, err := provider.Verifier(oidcConfig).Verify(ctx, rawIDToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify ID Token: %w", err)
 	}
